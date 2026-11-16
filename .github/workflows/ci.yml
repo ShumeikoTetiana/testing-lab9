@@ -47,6 +47,8 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+      - name: Docker API для Testcontainers
+        run: echo "api.version=1.44" > ~/.docker-java.properties
       - name: Integration tests (Testcontainers + PostgreSQL)
         run: mvn -B test -Pintegration
       - name: Зберегти test report
