@@ -1,0 +1,57 @@
+name: CI
+
+# Trigger: pipeline запускається автоматично після push та pull request
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build (компіляція без тестів)
+        run: mvn -B -DskipTests package
+
+  unit-tests:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Unit tests
+        run: mvn -B test -Punit
+      - name: Зберегти test report
+        if: always()   # звіт зберігається і коли тести впали
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-report
+          path: target/surefire-reports/
+
+  integration-tests:
+    needs: unit-tests
+    runs-on: ubuntu-latest   # на runner є Docker, потрібен для Testcontainers (PostgreSQL)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Integration tests (Testcontainers + PostgreSQL)
+        run: mvn -B test -Pintegration
+      - name: Зберегти test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-report
+          path: target/surefire-reports/
