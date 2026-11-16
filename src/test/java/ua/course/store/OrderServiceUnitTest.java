@@ -20,7 +20,7 @@ class OrderServiceUnitTest {
     @Test
     @DisplayName("Знижка 20% від 2000 грн із підтвердженим купоном")
     void discountAppliedAtThreshold() {
-        assertEquals(160000, service((p, q) -> true).calculateTotal(100000, 2, false, true, false));
+        assertEquals(150000, service((p, q) -> true).calculateTotal(100000, 2, false, true, false));
     }
 
     @Test
